@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Modeling Introduction to Deep Learning — visual summary</title>
+<style>
+  :root{
+    --bg:#0d1117;
+    --panel:#161b22;
+    --panel-edge:#232b36;
+    --ink:#e6edf3;
+    --ink-dim:#8b97a6;
+    --mono:#aeb9c7;
+    --wire:#3a4656;
+    /* the modeling frame = cyan */
+    --frame:#39c0c9;
+    --frame-soft:rgba(57,192,201,0.12);
+    --frame-edge:rgba(57,192,201,0.45);
+    /* deep learning specifics = amber */
+    --dl:#e8a33d;
+    --dl-soft:rgba(232,163,61,0.10);
+    --dl-edge:rgba(232,163,61,0.45);
+    /* the key insight / why-it-works = violet */
+    --key:#a371f7;
+    --key-soft:rgba(163,113,247,0.12);
+    --key-edge:rgba(163,113,247,0.5);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1100px 500px at 50% -10%, #11202b 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    line-height:1.55;
+    padding:40px 20px 64px;
+  }
+  .wrap{max-width:940px;margin:0 auto;}
+  .mono{font-family:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;}
+
+  header{margin-bottom:30px;border-bottom:1px solid var(--panel-edge);padding-bottom:24px;}
+  .eyebrow{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--ink-dim);margin:0 0 12px;
+  }
+  h1{font-size:28px;font-weight:650;margin:0 0 10px;letter-spacing:-.01em;}
+  h1 .accent{color:var(--key);}
+  .sub{color:var(--ink-dim);font-size:15px;max-width:700px;margin:0;}
+  .byline{
+    margin-top:14px;font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11.5px;color:var(--ink-dim);letter-spacing:.03em;
+  }
+
+  /* section scaffolding */
+  section{margin-top:46px;}
+  .sec-eyebrow{
+    font-family:"JetBrains Mono",ui-monospace,monospace;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-dim);margin:0 0 6px;
+  }
+  h2{font-size:20px;font-weight:640;margin:0 0 12px;letter-spacing:-.01em;}
+  p.body{font-size:14.5px;color:var(--ink);margin:0 0 14px;max-width:760px;}
+  p.body code,li code{
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;
+    color:var(--mono);background:rgba(255,255,255,0.04);padding:1px 6px;border-radius:5px;
+  }
+  .legend{display:flex;flex-wrap:wrap;gap:18px;margin:20px 0 8px;}
+  .legend span{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-dim);}
+  .swatch{width:24px;height:0;border-top:3px solid;border-radius:2px;}
+  .sw-frame{border-color:var(--frame);}
+  .sw-dl{border-color:var(--dl);}
+  .sw-key{border-color:var(--key);}
+
+  /* figure shell */
+  figure{margin:18px 0 4px;}
+  .fig-card{
+    background:var(--panel);border:1px solid var(--panel-edge);border-radius:14px;
+    padding:22px 20px 16px;
+  }
+  figcaption{
+    font-size:12.5px;color:var(--ink-dim);margin-top:12px;
+    font-family:"JetBrains Mono",ui-monospace,monospace;letter-spacing:.02em;
+    text-align:center;
+  }
+  svg{display:block;width:100%;height:auto;}
+
+  /* the three-pillar grid */
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px;}
+  .pillar{
+    background:var(--dl-soft);border:1px solid var(--dl-edge);border-radius:14px;
+    padding:18px 16px;
+  }
+  .pillar .pnum{
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11px;
+    color:var(--dl);letter-spacing:.12em;
+  }
+  .pillar h3{font-size:15.5px;font-weight:640;margin:6px 0 8px;}
+  .pillar p{font-size:13px;color:var(--ink-dim);margin:0;}
+
+  /* callout */
+  .callout{
+    margin-top:24px;border:1px solid var(--key-edge);
+    background:linear-gradient(180deg,var(--key-soft),transparent);
+    border-radius:14px;padding:22px 24px;
+  }
+  .callout .tag{
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:10.5px;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--key);margin-bottom:10px;
+  }
+  .callout p{margin:0;font-size:15px;color:var(--ink);line-height:1.6;}
+  .callout strong{color:var(--ink);font-weight:650;}
+
+  /* next-up strip */
+  .next{
+    margin-top:34px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;
+    font-size:13px;color:var(--ink-dim);
+  }
+  .pill{
+    font-family:"JetBrains Mono",ui-monospace,monospace;font-size:11.5px;
+    border:1px solid var(--panel-edge);border-radius:999px;padding:6px 14px;
+    color:var(--ink-dim);background:var(--panel);
+  }
+  .pill.now{border-color:var(--frame-edge);color:var(--frame);}
+  .pill .arr{color:var(--wire);margin:0 2px;}
+
+  .note{margin-top:30px;font-size:12.5px;color:var(--ink-dim);
+    border-left:2px solid var(--wire);padding-left:14px;max-width:740px;}
+
+  /* SVG text helpers */
+  text{font-family:"Inter",sans-serif;}
+  .svg-label{fill:var(--ink);font-size:13px;font-weight:600;}
+  .svg-dim{fill:var(--ink-dim);font-size:11px;}
+  .svg-mono{font-family:"JetBrains Mono",ui-monospace,monospace;fill:var(--mono);font-size:11px;}
+
+  @media (max-width:720px){
+    .pillars{grid-template-columns:1fr;}
+    h1{font-size:23px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">BERT series · 1 · visual summary</p>
+    <h1>A modeling introduction to <span class="accent">deep learning</span></h1>
+    <p class="sub">You understand the tool far better once you understand the task it's doing.</p>
+  </header>
+
+  <div class="legend">
+    <span><i class="swatch sw-frame"></i> the modeling frame (general)</span>
+    <span><i class="swatch sw-dl"></i> deep-learning specifics</span>
+    <span><i class="swatch sw-key"></i> the key idea</span>
+  </div>
+
+  <!-- ============ THE ARC ============ -->
+  <section>
+    <p class="sec-eyebrow">the whole argument in one line</p>
+    <h2>From "what's the job?" to "why this tool?"</h2>
+    <p class="body">Here's how it's laid out. It begins broad (any model that fits parameters to data), pins down what "good" even means (a loss function), and only then brings in deep learning as <em>one particular way</em> to do that job — closing with the three reasons this particular way took over.</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 900 150" role="img" aria-label="The argument flow: parametric modeling to loss to deep learning to MLP to why it works">
+          <defs>
+            <marker id="arrow" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 z" fill="#3a4656"/>
+            </marker>
+          </defs>
+          <!-- nodes -->
+          <g>
+            <rect x="8"   y="48" width="150" height="54" rx="11" fill="#161b22" stroke="rgba(57,192,201,0.45)"/>
+            <text x="83"  y="72" text-anchor="middle" class="svg-label">Parametric</text>
+            <text x="83"  y="90" text-anchor="middle" class="svg-label">modeling</text>
+
+            <rect x="200" y="48" width="130" height="54" rx="11" fill="#161b22" stroke="rgba(57,192,201,0.45)"/>
+            <text x="265" y="72" text-anchor="middle" class="svg-label">Loss</text>
+            <text x="265" y="90" text-anchor="middle" class="svg-dim">defines "good"</text>
+
+            <rect x="372" y="48" width="140" height="54" rx="11" fill="#161b22" stroke="rgba(232,163,61,0.45)"/>
+            <text x="442" y="72" text-anchor="middle" class="svg-label">Deep learning</text>
+            <text x="442" y="90" text-anchor="middle" class="svg-dim">one way to do it</text>
+
+            <rect x="554" y="48" width="120" height="54" rx="11" fill="#161b22" stroke="rgba(232,163,61,0.45)"/>
+            <text x="614" y="72" text-anchor="middle" class="svg-label">The MLP</text>
+            <text x="614" y="90" text-anchor="middle" class="svg-dim">prototype net</text>
+
+            <rect x="716" y="48" width="176" height="54" rx="11" fill="#161b22" stroke="rgba(163,113,247,0.5)"/>
+            <text x="804" y="72" text-anchor="middle" class="svg-label">Why it works</text>
+            <text x="804" y="90" text-anchor="middle" class="svg-dim">3 properties</text>
+          </g>
+          <!-- arrows -->
+          <line x1="158" y1="75" x2="196" y2="75" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow)"/>
+          <line x1="330" y1="75" x2="368" y2="75" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow)"/>
+          <line x1="512" y1="75" x2="550" y2="75" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow)"/>
+          <line x1="674" y1="75" x2="712" y2="75" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow)"/>
+        </svg>
+      </div>
+      <figcaption>general frame → definition of success → the tool → the prototype → why the tool wins</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ PARAMETRIC MODELING ============ -->
+  <section>
+    <p class="sec-eyebrow">step 1 · the frame</p>
+    <h2>A model captures <em>structure</em> and treats the rest as noise</h2>
+    <p class="body">A parametric model takes a set of parameters (called <code>θ</code>) and uses them to describe the meaningful pattern in your data. The twist: <strong>you</strong> decide what counts as structure by choosing the model. Anything the model can't represent is, by definition, noise. The whole game is then "pick a good model, find good parameters for it."</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 900 230" role="img" aria-label="Data flows into a model; structure is kept, noise is discarded">
+          <defs>
+            <marker id="arrow2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 z" fill="#3a4656"/>
+            </marker>
+          </defs>
+          <!-- raw data -->
+          <rect x="20" y="78" width="170" height="74" rx="12" fill="#161b22" stroke="#232b36"/>
+          <text x="105" y="106" text-anchor="middle" class="svg-label">Raw random</text>
+          <text x="105" y="124" text-anchor="middle" class="svg-label">process</text>
+          <text x="105" y="142" text-anchor="middle" class="svg-dim">data with a pattern + jitter</text>
+
+          <line x1="190" y1="115" x2="252" y2="115" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow2)"/>
+
+          <!-- model -->
+          <rect x="256" y="70" width="200" height="90" rx="12" fill="rgba(57,192,201,0.12)" stroke="rgba(57,192,201,0.45)"/>
+          <text x="356" y="100" text-anchor="middle" class="svg-label">Model M(θ)</text>
+          <text x="356" y="120" text-anchor="middle" class="svg-dim">a chosen family of patterns,</text>
+          <text x="356" y="136" text-anchor="middle" class="svg-dim">tuned by parameters θ</text>
+
+          <!-- fork -->
+          <line x1="456" y1="100" x2="640" y2="58" stroke="#39c0c9" stroke-width="2" marker-end="url(#arrow2)"/>
+          <line x1="456" y1="130" x2="640" y2="174" stroke="#3a4656" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow2)"/>
+
+          <!-- structure kept -->
+          <rect x="646" y="28" width="234" height="60" rx="12" fill="#161b22" stroke="rgba(57,192,201,0.45)"/>
+          <text x="664" y="54" class="svg-label" style="fill:#39c0c9;">✓ Structure — kept</text>
+          <text x="664" y="74" class="svg-dim">the part the model represents</text>
+
+          <!-- noise discarded -->
+          <rect x="646" y="146" width="234" height="60" rx="12" fill="#161b22" stroke="#232b36"/>
+          <text x="664" y="172" class="svg-label" style="fill:#8b97a6;">✕ Noise — discarded</text>
+          <text x="664" y="192" class="svg-dim">everything the model can't capture</text>
+        </svg>
+      </div>
+      <figcaption>"noise" isn't a property of the world — it's whatever your chosen model decides not to model</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ SOURCES OF ERROR ============ -->
+  <section>
+    <p class="sec-eyebrow">step 1b · two ways to be wrong</p>
+    <h2>Approximation error vs. estimation error</h2>
+    <p class="body">Once you've picked a model and tried to fit it, the gap between your result and the truth splits into two distinct failures. Knowing which one you're suffering from tells you what to fix: a richer model, or better-estimated parameters.</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 900 260" role="img" aria-label="Truth, best possible model in family, and your fitted estimate, with the two error gaps between them">
+          <defs>
+            <marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+              <path d="M0,0 L8,4 L0,8 z" fill="#e8a33d"/>
+            </marker>
+          </defs>
+          <!-- three dots on a line -->
+          <line x1="120" y1="130" x2="780" y2="130" stroke="#232b36" stroke-width="2"/>
+
+          <!-- truth -->
+          <circle cx="150" cy="130" r="13" fill="#39c0c9"/>
+          <text x="150" y="172" text-anchor="middle" class="svg-label">Truth</text>
+          <text x="150" y="190" text-anchor="middle" class="svg-dim">the real distribution</text>
+
+          <!-- best in family -->
+          <circle cx="470" cy="130" r="13" fill="#a371f7"/>
+          <text x="470" y="172" text-anchor="middle" class="svg-label">Best possible</text>
+          <text x="470" y="190" text-anchor="middle" class="svg-dim">in your model family</text>
+
+          <!-- your fit -->
+          <circle cx="750" cy="130" r="13" fill="#e8a33d"/>
+          <text x="750" y="172" text-anchor="middle" class="svg-label">Your fit</text>
+          <text x="750" y="190" text-anchor="middle" class="svg-dim">the θ you actually found</text>
+
+          <!-- gap 1: approximation -->
+          <line x1="165" y1="92" x2="455" y2="92" stroke="#a371f7" stroke-width="2" marker-start="url(#arrow3)" marker-end="url(#arrow3)"/>
+          <text x="310" y="80" text-anchor="middle" class="svg-mono" style="fill:#a371f7;">approximation error</text>
+          <text x="310" y="112" text-anchor="middle" class="svg-dim">model too simple to reach the truth</text>
+
+          <!-- gap 2: estimation -->
+          <line x1="485" y1="92" x2="735" y2="92" stroke="#e8a33d" stroke-width="2" marker-start="url(#arrow3)" marker-end="url(#arrow3)"/>
+          <text x="610" y="80" text-anchor="middle" class="svg-mono" style="fill:#e8a33d;">estimation error</text>
+          <text x="610" y="112" text-anchor="middle" class="svg-dim">didn't fit the params well enough</text>
+
+          <text x="450" y="236" text-anchor="middle" class="svg-dim">total error = how far your fit lands from the truth = approximation + estimation</text>
+        </svg>
+      </div>
+      <figcaption>also called model-mismatch (approximation) and parametric (estimation) error</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ LOSS LOOP ============ -->
+  <section>
+    <p class="sec-eyebrow">step 2 · defining "good"</p>
+    <h2>A loss function turns a vague wish into a number to minimize</h2>
+    <p class="body">Saying what we want is surprisingly hard, so we encode it as a <strong>loss</strong> — small when the model does well, large when it doesn't. Training is then just a search: keep nudging <code>θ</code> until the average loss across the data is as small as possible. (Classic example: the zero-one loss for cat-vs-dog — score 1 when wrong, 0 when right.)</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 760 220" role="img" aria-label="A training loop: model predicts, loss scores it, parameters update, repeat">
+          <defs>
+            <marker id="arrow4" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+              <path d="M0,0 L9,4.5 L0,9 z" fill="#3a4656"/>
+            </marker>
+          </defs>
+          <!-- model -->
+          <rect x="60"  y="80" width="160" height="60" rx="12" fill="rgba(232,163,61,0.10)" stroke="rgba(232,163,61,0.45)"/>
+          <text x="140" y="108" text-anchor="middle" class="svg-label">Model M(θ)</text>
+          <text x="140" y="126" text-anchor="middle" class="svg-dim">makes a prediction</text>
+
+          <!-- loss -->
+          <rect x="300" y="80" width="160" height="60" rx="12" fill="#161b22" stroke="#232b36"/>
+          <text x="380" y="108" text-anchor="middle" class="svg-label">Loss ℓ</text>
+          <text x="380" y="126" text-anchor="middle" class="svg-dim">how wrong was it?</text>
+
+          <!-- update -->
+          <rect x="540" y="80" width="160" height="60" rx="12" fill="#161b22" stroke="#232b36"/>
+          <text x="620" y="108" text-anchor="middle" class="svg-label">Update θ</text>
+          <text x="620" y="126" text-anchor="middle" class="svg-dim">nudge to lower loss</text>
+
+          <line x1="220" y1="110" x2="296" y2="110" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow4)"/>
+          <line x1="460" y1="110" x2="536" y2="110" stroke="#3a4656" stroke-width="2" marker-end="url(#arrow4)"/>
+
+          <!-- loop back -->
+          <path d="M620,140 L620,185 L140,185 L140,142" fill="none" stroke="#3a4656" stroke-width="2" stroke-dasharray="5 5" marker-end="url(#arrow4)"/>
+          <text x="380" y="178" text-anchor="middle" class="svg-mono">repeat until loss stops dropping</text>
+        </svg>
+      </div>
+      <figcaption>the inner loop of basically all model fitting — deep learning included</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ THE MLP ============ -->
+  <section>
+    <p class="sec-eyebrow">step 3 · the tool, finally</p>
+    <h2>Deep learning = many simple functions composed into one big function</h2>
+    <p class="body">A deep net is just lots of parameterized functions chained together. The prototype is the <strong>Multi-Layer Perceptron (MLP)</strong>: each layer does a linear transform (<code>Wx + b</code>) followed by a nonlinearity (<code>max(0, ·)</code>, i.e. ReLU), and you stack them. Numbers in, numbers out — but the stacking is where the power hides.</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 820 300" role="img" aria-label="An MLP: input layer, two hidden layers, output, each layer a linear transform plus ReLU">
+          <defs>
+            <marker id="edge" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+              <path d="M0,0 L6,3 L0,6 z" fill="#2a3340"/>
+            </marker>
+          </defs>
+          <!-- layer labels -->
+          <text x="90"  y="34" text-anchor="middle" class="svg-mono">input x</text>
+          <text x="310" y="34" text-anchor="middle" class="svg-mono">hidden 1</text>
+          <text x="530" y="34" text-anchor="middle" class="svg-mono">hidden 2</text>
+          <text x="730" y="34" text-anchor="middle" class="svg-mono">output</text>
+
+          <!-- edges (drawn first, behind nodes) -->
+          <g stroke="#2a3340" stroke-width="1">
+            <!-- input(3) -> h1(4) -->
+            <line x1="90" y1="90"  x2="310" y2="80"/><line x1="90" y1="90"  x2="310" y2="140"/><line x1="90" y1="90"  x2="310" y2="200"/><line x1="90" y1="90"  x2="310" y2="260"/>
+            <line x1="90" y1="160" x2="310" y2="80"/><line x1="90" y1="160" x2="310" y2="140"/><line x1="90" y1="160" x2="310" y2="200"/><line x1="90" y1="160" x2="310" y2="260"/>
+            <line x1="90" y1="230" x2="310" y2="80"/><line x1="90" y1="230" x2="310" y2="140"/><line x1="90" y1="230" x2="310" y2="200"/><line x1="90" y1="230" x2="310" y2="260"/>
+            <!-- h1(4) -> h2(4) -->
+            <line x1="310" y1="80"  x2="530" y2="80"/><line x1="310" y1="80"  x2="530" y2="140"/><line x1="310" y1="80"  x2="530" y2="200"/><line x1="310" y1="80"  x2="530" y2="260"/>
+            <line x1="310" y1="140" x2="530" y2="80"/><line x1="310" y1="140" x2="530" y2="140"/><line x1="310" y1="140" x2="530" y2="200"/><line x1="310" y1="140" x2="530" y2="260"/>
+            <line x1="310" y1="200" x2="530" y2="80"/><line x1="310" y1="200" x2="530" y2="140"/><line x1="310" y1="200" x2="530" y2="200"/><line x1="310" y1="200" x2="530" y2="260"/>
+            <line x1="310" y1="260" x2="530" y2="80"/><line x1="310" y1="260" x2="530" y2="140"/><line x1="310" y1="260" x2="530" y2="200"/><line x1="310" y1="260" x2="530" y2="260"/>
+            <!-- h2(4) -> out(2) -->
+            <line x1="530" y1="80"  x2="730" y2="135"/><line x1="530" y1="80"  x2="730" y2="205"/>
+            <line x1="530" y1="140" x2="730" y2="135"/><line x1="530" y1="140" x2="730" y2="205"/>
+            <line x1="530" y1="200" x2="730" y2="135"/><line x1="530" y1="200" x2="730" y2="205"/>
+            <line x1="530" y1="260" x2="730" y2="135"/><line x1="530" y1="260" x2="730" y2="205"/>
+          </g>
+
+          <!-- nodes -->
+          <g>
+            <circle cx="90" cy="90"  r="15" fill="#161b22" stroke="#39c0c9" stroke-width="1.5"/>
+            <circle cx="90" cy="160" r="15" fill="#161b22" stroke="#39c0c9" stroke-width="1.5"/>
+            <circle cx="90" cy="230" r="15" fill="#161b22" stroke="#39c0c9" stroke-width="1.5"/>
+
+            <circle cx="310" cy="80"  r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="310" cy="140" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="310" cy="200" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="310" cy="260" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+
+            <circle cx="530" cy="80"  r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="530" cy="140" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="530" cy="200" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+            <circle cx="530" cy="260" r="15" fill="#161b22" stroke="#e8a33d" stroke-width="1.5"/>
+
+            <circle cx="730" cy="135" r="15" fill="#161b22" stroke="#a371f7" stroke-width="1.5"/>
+            <circle cx="730" cy="205" r="15" fill="#161b22" stroke="#a371f7" stroke-width="1.5"/>
+          </g>
+
+          <!-- per-layer op annotation -->
+          <text x="200" y="292" text-anchor="middle" class="svg-dim">each step:  max(0, Wx + b)  =  linear, then ReLU</text>
+        </svg>
+      </div>
+      <figcaption>compose enough of these simple linear+ReLU layers and you can represent almost any function</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ DEPTH -> EXPRESSIVENESS ============ -->
+  <section>
+    <p class="sec-eyebrow">step 4a · the depth payoff</p>
+    <h2>Adding depth multiplies expressiveness</h2>
+    <p class="body">Why <em>this</em> shape of function? Because depth buys a lot. A wide-enough net can approximate smooth functions (the Universal Approximation Theorem), but the striking result is that adding layers <strong>linearly</strong> can increase the number of distinct regions the network carves up <strong>exponentially</strong> — each new layer can fold the input space onto itself, roughly doubling the pieces.</p>
+
+    <figure>
+      <div class="fig-card">
+        <svg viewBox="0 0 820 180" role="img" aria-label="Each added layer roughly doubles the number of linear regions: 1 layer 2 regions, 2 layers 4, 3 layers 8">
+          <!-- 1 layer -->
+          <g>
+            <text x="135" y="34" text-anchor="middle" class="svg-mono">1 layer</text>
+            <rect x="40" y="50" width="190" height="60" rx="8" fill="#161b22" stroke="#232b36"/>
+            <line x1="135" y1="50" x2="135" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <text x="135" y="138" text-anchor="middle" class="svg-label" style="fill:#e8a33d;">2 regions</text>
+          </g>
+          <!-- 2 layers -->
+          <g>
+            <text x="410" y="34" text-anchor="middle" class="svg-mono">2 layers</text>
+            <rect x="315" y="50" width="190" height="60" rx="8" fill="#161b22" stroke="#232b36"/>
+            <line x1="362" y1="50" x2="362" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="410" y1="50" x2="410" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="458" y1="50" x2="458" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <text x="410" y="138" text-anchor="middle" class="svg-label" style="fill:#e8a33d;">4 regions</text>
+          </g>
+          <!-- 3 layers -->
+          <g>
+            <text x="685" y="34" text-anchor="middle" class="svg-mono">3 layers</text>
+            <rect x="590" y="50" width="190" height="60" rx="8" fill="#161b22" stroke="#232b36"/>
+            <line x1="614" y1="50" x2="614" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="638" y1="50" x2="638" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="662" y1="50" x2="662" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="686" y1="50" x2="686" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="710" y1="50" x2="710" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="734" y1="50" x2="734" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <line x1="758" y1="50" x2="758" y2="110" stroke="#e8a33d" stroke-width="1.5"/>
+            <text x="685" y="138" text-anchor="middle" class="svg-label" style="fill:#e8a33d;">8 regions</text>
+          </g>
+          <!-- between arrows -->
+          <text x="272" y="86" text-anchor="middle" class="svg-dim" style="font-size:18px;">×2</text>
+          <text x="547" y="86" text-anchor="middle" class="svg-dim" style="font-size:18px;">×2</text>
+        </svg>
+      </div>
+      <figcaption>+1 layer ≈ ×2 regions → linear cost in depth, exponential gain in expressiveness</figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ THREE PILLARS ============ -->
+  <section>
+    <p class="sec-eyebrow">step 4b · why this tool won</p>
+    <h2>Three properties, all true at once</h2>
+    <p class="body">Plenty of function families could model the world. Deep nets took over because they hit all three of these simultaneously — and that combination is rare.</p>
+
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pnum">01 · flexible</div>
+        <h3>Expressiveness</h3>
+        <p>A small parameter budget can represent a huge variety of functions — and depth compounds it exponentially (the folding picture above).</p>
+      </div>
+      <div class="pillar">
+        <div class="pnum">02 · fast</div>
+        <h3>Efficiency</h3>
+        <p>Both the forward output <em>and</em> its derivatives compute quickly (linear in parameter count), so gradient-based training with SGD is practical. Specialized hardware — the AlexNet moment — made it real.</p>
+      </div>
+      <div class="pillar">
+        <div class="pnum">03 · generalizes</div>
+        <h3>Generalization</h3>
+        <p>Despite all that expressiveness, nets do well on unseen data. Counterintuitive, and still not fully explained — many theories, none fully satisfying.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TAKEAWAY ============ -->
+  <div class="callout">
+    <div class="tag">the one-sentence takeaway</div>
+    <p>Deep learning is just a <strong>flexible, efficiently-trainable, surprisingly-generalizable</strong> way to pick a function out of a huge family — to capture the structure in your data. Seeing it as "a means to the parametric-modeling end" is the frame the author wants you carrying into the Transformer and BERT posts.</p>
+  </div>
+
+  <!-- ============ NEXT UP ============ -->
+  <section>
+    <p class="sec-eyebrow">where the series goes</p>
+    <div class="next">
+      <span class="pill now">part 1 · DL intro (this one)</span>
+      <span class="arr">→</span>
+      <span class="pill">part 2 · the Transformer</span>
+      <span class="arr">→</span>
+      <span class="pill">part 3 · BERT</span>
+    </div>
+  </section>
+
+  <p class="note">
+    Deliberately out of scope in the original: the deep theory of optimization and generalization. The post's job is only to set up enough modeling vocabulary — structure vs. noise, loss, composed functions — to make the Transformer and BERT discussions land.
+  </p>
+
+</div>
+</body>
+</html>
